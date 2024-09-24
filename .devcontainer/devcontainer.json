@@ -4,7 +4,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-vscode.hexeditor"
+                "ms-vscode.hexeditor",
+                "ms-vscode.cpptools"
             ],
             "settings": {
                 // always default to bash not sh

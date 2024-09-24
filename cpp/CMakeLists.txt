@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 project(ecdsa)
 
-add_compile_options("-g")
-add_executable(ecdsa ecdsa.cpp)
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPENSSL REQUIRED openssl)
 
@@ -14,4 +12,13 @@ else()
     # Error; with REQUIRED, pkg_search_module() will throw an error by it's own
 endif()
 
-target_link_libraries(ecdsa ${OPENSSL_LIBRARIES})
+add_compile_options("-g")
+
+# add_executable(ecdsa_sign_verify_legacy ecdsa_sign_verify_legacy.cpp)
+# target_link_libraries(ecdsa_sign_verify_legacy ${OPENSSL_LIBRARIES})
+
+# add_executable(ecdsa_sign_verify ecdsa_sign_verify.cpp)
+# target_link_libraries(ecdsa_sign_verify ${OPENSSL_LIBRARIES})
+
+add_executable(parse_cms parse_cms.cpp)
+target_link_libraries(parse_cms ${OPENSSL_LIBRARIES})

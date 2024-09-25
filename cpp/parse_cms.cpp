@@ -6,6 +6,8 @@
 
 #include <openssl/cms.h>
 #include <openssl/bio.h>
+#include <openssl/asn1.h>
+// #include <openssl/x509.h>
 
 int read_binary_file(std::filesystem::path path, std::vector<uint8_t> &in)
 {
@@ -43,7 +45,11 @@ int main()
         for (int a = 0; a < CMS_signed_get_attr_count(si); ++a)
         {
             X509_ATTRIBUTE *attr = CMS_signed_get_attr(si, a);
+            ASN1_OBJECT *attrObj = X509_ATTRIBUTE_get0_object(attr);
+            std::cout << OBJ_nid2ln(OBJ_obj2nid(attrObj)) << std::endl;
             ASN1_TYPE *attrType = X509_ATTRIBUTE_get0_type(attr, 0);
+            std::cout << "\t" << attrType->type << ": ";
+            std::cout << attrType->value.asn1_string->data << std::endl;
             // /usr/include/openssl/asn1.h
             // **** ASN.1 tag values ****
             // V_ASN1_EOC                      0
@@ -75,15 +81,21 @@ int main()
             // V_ASN1_UNIVERSALSTRING          28 /**/
             // V_ASN1_BMPSTRING                30
             auto v = attrType->value;
+            const ASN1_ITEM *item = NULL;
+            void *thing = NULL;
+            std::vector<unsigned char> buf(100);
+            unsigned char *s = buf.data();
             switch(attrType->type)
             {
-                // case V_ASN1_OBJECT:
-                //     std::cout << v.asn1_string->data << std::endl;
-
-                //     break;
+                case V_ASN1_SEQUENCE:
+                    item = ASN1_ITEM_rptr(ASN1_ANY);
+                    thing = ASN1_TYPE_unpack_sequence(item, attrType);
+                    
+                    ASN1_STRING_to_UTF8(&s, (ASN1_STRING*)item);
+                    
+                    break;
                 default:
-                    std::cout << attrType->type << ": ";
-                    std::cout << v.asn1_string->data << std::endl;
+                    break;
 
             };
             // ASN1_OBJECT *attrData;

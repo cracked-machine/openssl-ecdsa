@@ -9,14 +9,15 @@
 #include <openssl/err.h>
 // #include "../dep/openssl/crypto/cms/cms_local.h" /* for d.signedData and d.envelopedData */
 
-/*
-    * Test data generated using:
-    * openssl cms -sign -md sha256 -signer ./test/certs/rootCA.pem -inkey \
-    * ./test/certs/rootCA.key -nodetach -outform DER -in ./in.txt -out out.der \
-    * -nosmimecap
-    */
+void process_errors()
+{
+    auto *errbio = BIO_new_file("err.log", "w");
+    ERR_print_errors(errbio);
+    BIO_flush(errbio);
+    BIO_free(errbio);   // this closes the FILE stream
+}
 
-   
+
 CMS_ContentInfo *read_rsa_signed_cms_file()
 {
     std::vector<unsigned char> cms_data = {
@@ -230,17 +231,33 @@ CMS_ContentInfo *read_secp384r1_signed_cms()
     return cms;
 }
 
-
-int main()
+X509 *read_secp384r1_cert()
 {
-    auto *errbio = BIO_new_file("err.log", "w");
+    std::vector<unsigned char> cert_data;
+    std::filesystem::path path("/workspaces/openssl-ecdsa/scripts/cms-out/secp384r1-cert.pem");
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "file not found:\n\t" << path.string() << std::endl;
+    }
+    auto *certbio = BIO_new_file(path.c_str(), "rb");
+    
+    auto *x509 = d2i_X509_bio(certbio, nullptr);
+    
+    BIO_free(certbio);
+    return x509;
+}
 
+// use must first run scripts/cms-inc-certs.sh
+int verify_cert_included_cms()
+{
+    int res = 0;
+
+    // see scripts/cms-exc-certs.sh for generating these files
     auto *cms = read_secp384r1_signed_cms();
 
-    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY;
-    int res = 0;
-    
-    res = CMS_verify(cms, NULL, NULL, NULL, NULL, flags);
+    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
+    res = CMS_verify(cms, nullptr, nullptr, nullptr, nullptr, flags);
+    if (res == -1) { process_errors(); }
+    if (res != 1) {return res;}
     
     auto *si_stack = CMS_get0_SignerInfos(cms);
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
@@ -251,13 +268,66 @@ int main()
         auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si);
                 
         res = CMS_SignerInfo_verify(si);
-        res = CMS_SignerInfo_verify_content(si, nullptr);
+        if (res == -1) { process_errors(); }
+        if (res != 1) {return res;}
+        // res = CMS_SignerInfo_verify_content(si, nullptr);
+        // if (res == -1) { process_errors(); }
+        // if (res != 1) {return res;}
     }    
-    // auto b = CMS_SignedData_verify(cms->d.signedData, NULL, NULL, NULL, NULL, NULL, flags, NULL, NULL);
-    // auto *sd = cms->d.signedData;
+
+    return res;        
+}
+
+int verify_cert_excluded_cms()
+{
+    int res = 0;
+    auto *errbio = BIO_new_file("err.log", "w");
+
+    // see scripts/cms-exc-certs.sh for generating these files
+    auto *cms = read_secp384r1_signed_cms();
+
+    auto *x509_stack = sk_X509_new(nullptr);
+    sk_X509_push(x509_stack, read_secp384r1_cert());
+    
+    X509_STORE  *x509_store = X509_STORE_new();
+    X509_STORE_add_cert(x509_store,  read_secp384r1_cert());
+
+    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
+    res = CMS_verify(cms, x509_stack, x509_store, NULL, NULL, flags);
+    if (res == -1) { process_errors(); }
+    if (res != 1) {return res;}
+    
+    auto *si_stack = CMS_get0_SignerInfos(cms);
+    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
+    {
+        auto *si = sk_CMS_SignerInfo_value(si_stack, i);
+        auto *sig = CMS_SignerInfo_get0_signature(si);
+        auto *mctx = CMS_SignerInfo_get0_md_ctx(si);
+        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si);
+                
+        res = CMS_SignerInfo_verify(si);
+        if (res == -1) { process_errors(); }
+        if (res != 1) {return res;}
+        // res = CMS_SignerInfo_verify_content(si, nullptr);
+        // if (res == -1) { process_errors(); }
+        // if (res != 1) {return res;}
+    }    
 
     ERR_print_errors(errbio);
     BIO_flush(errbio);
     BIO_free(errbio);   // this closes the FILE stream
-    return 0;    
+    return res;        
+}
+
+int main()
+{
+    // use must first run scripts/cms-inc-certs.sh
+    std::system("/workspaces/openssl-ecdsa/scripts/cms-inc-certs.sh");
+    int res = verify_cert_included_cms();
+
+    // use must first run scripts/cms-exc-certs.sh
+    std::system("/workspaces/openssl-ecdsa/scripts/cms-exc-certs.sh");
+    res = verify_cert_excluded_cms();
+
+    return 0;
 }

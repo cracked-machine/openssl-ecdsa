@@ -117,6 +117,32 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named ecdsa_sign_verify_legacy
+
+# Build rule for target.
+ecdsa_sign_verify_legacy: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ecdsa_sign_verify_legacy
+.PHONY : ecdsa_sign_verify_legacy
+
+# fast build rule for target.
+ecdsa_sign_verify_legacy/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/build
+.PHONY : ecdsa_sign_verify_legacy/fast
+
+#=============================================================================
+# Target rules for targets named ecdsa_sign_verify
+
+# Build rule for target.
+ecdsa_sign_verify: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ecdsa_sign_verify
+.PHONY : ecdsa_sign_verify
+
+# fast build rule for target.
+ecdsa_sign_verify/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/build
+.PHONY : ecdsa_sign_verify/fast
+
+#=============================================================================
 # Target rules for targets named parse_cms
 
 # Build rule for target.
@@ -128,6 +154,91 @@ parse_cms: cmake_check_build_system
 parse_cms/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/parse_cms.dir/build.make CMakeFiles/parse_cms.dir/build
 .PHONY : parse_cms/fast
+
+#=============================================================================
+# Target rules for targets named cms_verify
+
+# Build rule for target.
+cms_verify: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cms_verify
+.PHONY : cms_verify
+
+# fast build rule for target.
+cms_verify/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/build
+.PHONY : cms_verify/fast
+
+cms_verify.o: cms_verify.cpp.o
+.PHONY : cms_verify.o
+
+# target to build an object file
+cms_verify.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/cms_verify.cpp.o
+.PHONY : cms_verify.cpp.o
+
+cms_verify.i: cms_verify.cpp.i
+.PHONY : cms_verify.i
+
+# target to preprocess a source file
+cms_verify.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/cms_verify.cpp.i
+.PHONY : cms_verify.cpp.i
+
+cms_verify.s: cms_verify.cpp.s
+.PHONY : cms_verify.s
+
+# target to generate assembly for a file
+cms_verify.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/cms_verify.cpp.s
+.PHONY : cms_verify.cpp.s
+
+ecdsa_sign_verify.o: ecdsa_sign_verify.cpp.o
+.PHONY : ecdsa_sign_verify.o
+
+# target to build an object file
+ecdsa_sign_verify.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/ecdsa_sign_verify.cpp.o
+.PHONY : ecdsa_sign_verify.cpp.o
+
+ecdsa_sign_verify.i: ecdsa_sign_verify.cpp.i
+.PHONY : ecdsa_sign_verify.i
+
+# target to preprocess a source file
+ecdsa_sign_verify.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/ecdsa_sign_verify.cpp.i
+.PHONY : ecdsa_sign_verify.cpp.i
+
+ecdsa_sign_verify.s: ecdsa_sign_verify.cpp.s
+.PHONY : ecdsa_sign_verify.s
+
+# target to generate assembly for a file
+ecdsa_sign_verify.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/ecdsa_sign_verify.cpp.s
+.PHONY : ecdsa_sign_verify.cpp.s
+
+ecdsa_sign_verify_legacy.o: ecdsa_sign_verify_legacy.cpp.o
+.PHONY : ecdsa_sign_verify_legacy.o
+
+# target to build an object file
+ecdsa_sign_verify_legacy.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/ecdsa_sign_verify_legacy.cpp.o
+.PHONY : ecdsa_sign_verify_legacy.cpp.o
+
+ecdsa_sign_verify_legacy.i: ecdsa_sign_verify_legacy.cpp.i
+.PHONY : ecdsa_sign_verify_legacy.i
+
+# target to preprocess a source file
+ecdsa_sign_verify_legacy.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/ecdsa_sign_verify_legacy.cpp.i
+.PHONY : ecdsa_sign_verify_legacy.cpp.i
+
+ecdsa_sign_verify_legacy.s: ecdsa_sign_verify_legacy.cpp.s
+.PHONY : ecdsa_sign_verify_legacy.s
+
+# target to generate assembly for a file
+ecdsa_sign_verify_legacy.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/ecdsa_sign_verify_legacy.cpp.s
+.PHONY : ecdsa_sign_verify_legacy.cpp.s
 
 parse_cms.o: parse_cms.cpp.o
 .PHONY : parse_cms.o
@@ -161,7 +272,19 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... cms_verify"
+	@echo "... ecdsa_sign_verify"
+	@echo "... ecdsa_sign_verify_legacy"
 	@echo "... parse_cms"
+	@echo "... cms_verify.o"
+	@echo "... cms_verify.i"
+	@echo "... cms_verify.s"
+	@echo "... ecdsa_sign_verify.o"
+	@echo "... ecdsa_sign_verify.i"
+	@echo "... ecdsa_sign_verify.s"
+	@echo "... ecdsa_sign_verify_legacy.o"
+	@echo "... ecdsa_sign_verify_legacy.i"
+	@echo "... ecdsa_sign_verify_legacy.s"
 	@echo "... parse_cms.o"
 	@echo "... parse_cms.i"
 	@echo "... parse_cms.s"

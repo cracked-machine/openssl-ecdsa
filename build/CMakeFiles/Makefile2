@@ -63,7 +63,10 @@ CMAKE_BINARY_DIR = /workspaces/openssl-ecdsa/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/ecdsa_sign_verify_legacy.dir/all
+all: CMakeFiles/ecdsa_sign_verify.dir/all
 all: CMakeFiles/parse_cms.dir/all
+all: CMakeFiles/cms_verify.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,8 +74,63 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/ecdsa_sign_verify_legacy.dir/clean
+clean: CMakeFiles/ecdsa_sign_verify.dir/clean
 clean: CMakeFiles/parse_cms.dir/clean
+clean: CMakeFiles/cms_verify.dir/clean
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/ecdsa_sign_verify_legacy.dir
+
+# All Build rule for target.
+CMakeFiles/ecdsa_sign_verify_legacy.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspaces/openssl-ecdsa/build/CMakeFiles --progress-num=5,6 "Built target ecdsa_sign_verify_legacy"
+.PHONY : CMakeFiles/ecdsa_sign_verify_legacy.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/ecdsa_sign_verify_legacy.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ecdsa_sign_verify_legacy.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 0
+.PHONY : CMakeFiles/ecdsa_sign_verify_legacy.dir/rule
+
+# Convenience name for target.
+ecdsa_sign_verify_legacy: CMakeFiles/ecdsa_sign_verify_legacy.dir/rule
+.PHONY : ecdsa_sign_verify_legacy
+
+# clean rule for target.
+CMakeFiles/ecdsa_sign_verify_legacy.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify_legacy.dir/build.make CMakeFiles/ecdsa_sign_verify_legacy.dir/clean
+.PHONY : CMakeFiles/ecdsa_sign_verify_legacy.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/ecdsa_sign_verify.dir
+
+# All Build rule for target.
+CMakeFiles/ecdsa_sign_verify.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspaces/openssl-ecdsa/build/CMakeFiles --progress-num=3,4 "Built target ecdsa_sign_verify"
+.PHONY : CMakeFiles/ecdsa_sign_verify.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/ecdsa_sign_verify.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/ecdsa_sign_verify.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 0
+.PHONY : CMakeFiles/ecdsa_sign_verify.dir/rule
+
+# Convenience name for target.
+ecdsa_sign_verify: CMakeFiles/ecdsa_sign_verify.dir/rule
+.PHONY : ecdsa_sign_verify
+
+# clean rule for target.
+CMakeFiles/ecdsa_sign_verify.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/ecdsa_sign_verify.dir/build.make CMakeFiles/ecdsa_sign_verify.dir/clean
+.PHONY : CMakeFiles/ecdsa_sign_verify.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/parse_cms.dir
@@ -81,7 +139,7 @@ clean: CMakeFiles/parse_cms.dir/clean
 CMakeFiles/parse_cms.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/parse_cms.dir/build.make CMakeFiles/parse_cms.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/parse_cms.dir/build.make CMakeFiles/parse_cms.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspaces/openssl-ecdsa/build/CMakeFiles --progress-num=1,2 "Built target parse_cms"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspaces/openssl-ecdsa/build/CMakeFiles --progress-num=7,8 "Built target parse_cms"
 .PHONY : CMakeFiles/parse_cms.dir/all
 
 # Build rule for subdir invocation for target.
@@ -99,6 +157,32 @@ parse_cms: CMakeFiles/parse_cms.dir/rule
 CMakeFiles/parse_cms.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/parse_cms.dir/build.make CMakeFiles/parse_cms.dir/clean
 .PHONY : CMakeFiles/parse_cms.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/cms_verify.dir
+
+# All Build rule for target.
+CMakeFiles/cms_verify.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/workspaces/openssl-ecdsa/build/CMakeFiles --progress-num=1,2 "Built target cms_verify"
+.PHONY : CMakeFiles/cms_verify.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/cms_verify.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/cms_verify.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/openssl-ecdsa/build/CMakeFiles 0
+.PHONY : CMakeFiles/cms_verify.dir/rule
+
+# Convenience name for target.
+cms_verify: CMakeFiles/cms_verify.dir/rule
+.PHONY : cms_verify
+
+# clean rule for target.
+CMakeFiles/cms_verify.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cms_verify.dir/build.make CMakeFiles/cms_verify.dir/clean
+.PHONY : CMakeFiles/cms_verify.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

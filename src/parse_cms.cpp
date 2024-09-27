@@ -42,44 +42,18 @@ int main()
     {
         auto *si = sk_CMS_SignerInfo_value(si_stack, i);
         
+        // iterate the signed attributes from the signer infos section
         for (int a = 0; a < CMS_signed_get_attr_count(si); ++a)
         {
             X509_ATTRIBUTE *attr = CMS_signed_get_attr(si, a);
+            // print the signed attribute oid as string
             ASN1_OBJECT *attrObj = X509_ATTRIBUTE_get0_object(attr);
             std::cout << OBJ_nid2ln(OBJ_obj2nid(attrObj)) << std::endl;
+            // print the signed attribute data type (int) and value (bytes)
             ASN1_TYPE *attrType = X509_ATTRIBUTE_get0_type(attr, 0);
             std::cout << "\t" << attrType->type << ": ";
             std::cout << attrType->value.asn1_string->data << std::endl;
-            // /usr/include/openssl/asn1.h
-            // **** ASN.1 tag values ****
-            // V_ASN1_EOC                      0
-            // V_ASN1_BOOLEAN                  1 /**/
-            // V_ASN1_INTEGER                  2
-            // V_ASN1_BIT_STRING               3
-            // V_ASN1_OCTET_STRING             4
-            // V_ASN1_NULL                     5
-            // V_ASN1_OBJECT                   6
-            // V_ASN1_OBJECT_DESCRIPTOR        7
-            // V_ASN1_EXTERNAL                 8
-            // V_ASN1_REAL                     9
-            // V_ASN1_ENUMERATED               10
-            // V_ASN1_UTF8STRING               12
-            // V_ASN1_SEQUENCE                 16
-            // V_ASN1_SET                      17
-            // V_ASN1_NUMERICSTRING            18 /**/
-            // V_ASN1_PRINTABLESTRING          19
-            // V_ASN1_T61STRING                20
-            // V_ASN1_TELETEXSTRING            20/* alias */
-            // V_ASN1_VIDEOTEXSTRING           21 /**/
-            // V_ASN1_IA5STRING                22
-            // V_ASN1_UTCTIME                  23
-            // V_ASN1_GENERALIZEDTIME          24 /**/
-            // V_ASN1_GRAPHICSTRING            25 /**/
-            // V_ASN1_ISO64STRING              26 /**/
-            // V_ASN1_VISIBLESTRING            26/* alias */
-            // V_ASN1_GENERALSTRING            27 /**/
-            // V_ASN1_UNIVERSALSTRING          28 /**/
-            // V_ASN1_BMPSTRING                30
+
             auto v = attrType->value;
             const ASN1_ITEM *item = NULL;
             void *thing = NULL;

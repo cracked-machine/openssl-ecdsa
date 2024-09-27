@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/parse_cms.dir/parse_cms.cpp.o -o parse_cms  -lssl -lcrypto 
+/usr/bin/c++ CMakeFiles/parse_cms.dir/parse_cms.cpp.o -o parse_cms  /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so 

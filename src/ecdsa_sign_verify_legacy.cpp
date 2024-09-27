@@ -80,11 +80,8 @@ static int sign_and_verify_deprecated()
   return function_status;
 }
 
-
-
 int main( int argc , char * argv[] )
 {
-    
     int status = sign_and_verify_deprecated();
     return(0) ;
 }

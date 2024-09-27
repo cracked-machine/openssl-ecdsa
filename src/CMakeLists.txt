@@ -1,28 +1,18 @@
 cmake_minimum_required(VERSION 3.15)
-
 project(ecdsa)
-
-find_package(PkgConfig REQUIRED)
-pkg_search_module(OPENSSL REQUIRED openssl)
-
-if( OPENSSL_FOUND )
-    include_directories(${OPENSSL_INCLUDE_DIRS})
-    message(STATUS "Using OpenSSL ${OPENSSL_VERSION}")
-else()
-    # Error; with REQUIRED, pkg_search_module() will throw an error by it's own
-endif()
-
 add_compile_options("-g")
 
-# add_executable(ecdsa_sign_verify_legacy ecdsa_sign_verify_legacy.cpp)
-# target_link_libraries(ecdsa_sign_verify_legacy ${OPENSSL_LIBRARIES})
+find_package(PkgConfig REQUIRED)
+pkg_search_module(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 
-# add_executable(ecdsa_sign_verify ecdsa_sign_verify.cpp)
-# target_link_libraries(ecdsa_sign_verify ${OPENSSL_LIBRARIES})
+add_executable(ecdsa_sign_verify_legacy ${CMAKE_SOURCE_DIR}/ecdsa_sign_verify_legacy.cpp)
+target_link_libraries(ecdsa_sign_verify_legacy PUBLIC PkgConfig::OPENSSL)
 
-add_executable(parse_cms 
-    ${CMAKE_SOURCE_DIR}/parse_cms.cpp
-)
-target_link_libraries(parse_cms 
-    ${OPENSSL_LIBRARIES}
-)
+add_executable(ecdsa_sign_verify ${CMAKE_SOURCE_DIR}/ecdsa_sign_verify.cpp)
+target_link_libraries(ecdsa_sign_verify PUBLIC PkgConfig::OPENSSL)
+
+add_executable(parse_cms ${CMAKE_SOURCE_DIR}/parse_cms.cpp)
+target_link_libraries(parse_cms PUBLIC PkgConfig::OPENSSL)
+
+add_executable(cms_verify ${CMAKE_SOURCE_DIR}/cms_verify.cpp)
+target_link_libraries(cms_verify PUBLIC PkgConfig::OPENSSL)

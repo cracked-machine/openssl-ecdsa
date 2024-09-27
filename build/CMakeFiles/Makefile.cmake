@@ -121,5 +121,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/ecdsa_sign_verify_legacy.dir/DependInfo.cmake"
+  "CMakeFiles/ecdsa_sign_verify.dir/DependInfo.cmake"
   "CMakeFiles/parse_cms.dir/DependInfo.cmake"
+  "CMakeFiles/cms_verify.dir/DependInfo.cmake"
   )

@@ -5,10 +5,9 @@
             "label": "build",
             "type": "shell",
             "command": [
-                "cd cpp &&",
-                "rm -rf build &&",
-                "cmake -S . -B build &&",
-                "cmake --build build"
+                "rm -rf ${workspaceFolder}/build &&",
+                "cmake -S ${workspaceFolder}/src -B ${workspaceFolder}/build &&",
+                "cmake --build ${workspaceFolder}/build"
             ],
             "problemMatcher": []
         }

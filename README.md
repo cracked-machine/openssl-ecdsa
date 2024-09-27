@@ -22,10 +22,3 @@ cd bash
 ./ecdsa.sh
 ``` 
 
-## C library
-```
-cd cpp
-cmake -S . -B build
-cmake --build build
-build/ecdsa
-```

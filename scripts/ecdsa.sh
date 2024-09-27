@@ -3,7 +3,7 @@
 # options
 HASHFUNC=sha256
 
-WORKDIR=out
+WORKDIR=/workspaces/openssl-ecdsa/scripts/ecdsa-out
 rm -rf ${WORKDIR} || true
 mkdir -p ${WORKDIR}
 

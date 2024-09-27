@@ -1,0 +1,3 @@
+/workspaces/openssl-ecdsa/build/CMakeFiles/parse_cms.dir
+/workspaces/openssl-ecdsa/build/CMakeFiles/edit_cache.dir
+/workspaces/openssl-ecdsa/build/CMakeFiles/rebuild_cache.dir

@@ -2,7 +2,7 @@
 
 PAYLOAD=plaintext.txt
 
-WORKDIR=out
+WORKDIR=/workspaces/openssl-ecdsa/scripts/cms-out
 rm -rf ${WORKDIR} || true
 mkdir -p ${WORKDIR}
 

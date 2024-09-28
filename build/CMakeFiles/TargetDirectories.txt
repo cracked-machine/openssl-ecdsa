@@ -1,6 +1,0 @@
-/workspaces/openssl-ecdsa/build/CMakeFiles/ecdsa_sign_verify_legacy.dir
-/workspaces/openssl-ecdsa/build/CMakeFiles/ecdsa_sign_verify.dir
-/workspaces/openssl-ecdsa/build/CMakeFiles/parse_cms.dir
-/workspaces/openssl-ecdsa/build/CMakeFiles/cms_verify.dir
-/workspaces/openssl-ecdsa/build/CMakeFiles/edit_cache.dir
-/workspaces/openssl-ecdsa/build/CMakeFiles/rebuild_cache.dir

@@ -253,8 +253,19 @@ int verify_cert_included_cms()
 
     // see scripts/cms-exc-certs.sh for generating these files
     auto *cms = read_secp384r1_signed_cms();
+    stack_st_X509 *cert_stack = CMS_get1_certs(cms);
+    for (int c=0; c < sk_X509_num(cert_stack); ++c)
+    {
+        X509 *cert = sk_X509_value(cert_stack, c);
+        // verify the cert against its own publickey
+        res = X509_self_signed(cert, 1);
+        if (res == -1) { process_errors(); }
+        if (res != 1) {return res;}
+        continue;
+    }
 
-    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
+    // unsigned int flags = 0;
+    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY;
     res = CMS_verify(cms, nullptr, nullptr, nullptr, nullptr, flags);
     if (res == -1) { process_errors(); }
     if (res != 1) {return res;}
@@ -291,6 +302,7 @@ int verify_cert_excluded_cms()
     
     X509_STORE  *x509_store = X509_STORE_new();
     X509_STORE_add_cert(x509_store,  read_secp384r1_cert());
+    // res = X509_verify_cert()
 
     unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
     res = CMS_verify(cms, x509_stack, x509_store, NULL, NULL, flags);
@@ -325,9 +337,9 @@ int main()
     std::system("/workspaces/openssl-ecdsa/scripts/cms-inc-certs.sh");
     int res = verify_cert_included_cms();
 
-    // use must first run scripts/cms-exc-certs.sh
-    std::system("/workspaces/openssl-ecdsa/scripts/cms-exc-certs.sh");
-    res = verify_cert_excluded_cms();
+    // // use must first run scripts/cms-exc-certs.sh
+    // std::system("/workspaces/openssl-ecdsa/scripts/cms-exc-certs.sh");
+    // res = verify_cert_excluded_cms();
 
     return 0;
 }

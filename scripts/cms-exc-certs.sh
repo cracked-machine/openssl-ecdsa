@@ -20,9 +20,11 @@ openssl ecparam -name ${CURVE} -out ${WORKDIR}/${KEYPARAMS}
 openssl req \
     -x509 \
     -noenc \
+    -subj "/CN=GB\/emailAddress=admin@something.com/C=US/ST=Ohio/L=Columbus/O=Widgets Inc/OU=Some Unit" \
     -newkey ec:${WORKDIR}/${KEYPARAMS} \
     -keyout ${WORKDIR}/${KEYFILE} \
-    -out ${WORKDIR}/${CERTFILE}
+    -out ${WORKDIR}/${CERTFILE} \
+    -verbose
 
 
 openssl cms \

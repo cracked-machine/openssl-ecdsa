@@ -1,24 +1,16 @@
 #include <vector>
 #include <iostream>
 #include <filesystem>
+#include <exception>
 
-#include <openssl/cms.h>
-#include <openssl/bio.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
-// #include "../dep/openssl/crypto/cms/cms_local.h" /* for d.signedData and d.envelopedData */
 
-void process_errors()
-{
-    auto *errbio = BIO_new_file("err.log", "w");
-    ERR_print_errors(errbio);
-    BIO_flush(errbio);
-    BIO_free(errbio);   // this closes the FILE stream
-}
+#include "openssl_ptrs.hpp"
 
 
-CMS_ContentInfo *read_rsa_signed_cms_file()
+UniqueCmsContentInfo read_rsa_signed_cms_file()
 {
     std::vector<unsigned char> cms_data = {
         0x30, 0x82, 0x05, 0xc5, 0x06, 0x09, 0x2a, 0x86,
@@ -213,36 +205,49 @@ CMS_ContentInfo *read_rsa_signed_cms_file()
     // BIO_write(derbio, cms_data.data(), cms_data.size());
     // BIO_free(derbio);
 
-    auto *bio = BIO_new_mem_buf(cms_data.data(), cms_data.size());
-    auto *cms = d2i_CMS_bio(bio, NULL);
+    UniqueBio bio = UniqueBio(BIO_new_mem_buf(cms_data.data(), cms_data.size()));
+    UniqueCmsContentInfo cms = UniqueCmsContentInfo(d2i_CMS_bio(bio.get(), NULL));
     return cms;
 }
 
-CMS_ContentInfo *read_secp384r1_signed_cms()
+void process_errors(int result, std::string op)
+{
+    UniqueBio errbio = UniqueBio(BIO_new_file("err.log", "w"));
+    if (result == 0)
+    {
+        std::cerr << "ERROR: " << op << std::endl; 
+    }
+    if (result == -1)
+    {
+        ERR_print_errors(errbio.get());
+        std::cerr << "FATAL: "<< op << ". See err.log." << std::endl;
+        std::terminate();
+    }
+}
+
+UniqueCmsContentInfo read_secp384r1_signed_cms()
 {
     std::vector<unsigned char> cms_data;
     std::filesystem::path path("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der");
     if (!std::filesystem::exists(path)) {
         std::cerr << "file not found:\n\t" << path.string() << "\nPlease run /workspaces/openssl-ecdsa/scripts/cms.sh first!" << std::endl;
     }
-    auto *derbio = BIO_new_file(path.c_str(), "rb");
-    auto *cms = d2i_CMS_bio(derbio, NULL);
-    BIO_free(derbio);
+    UniqueBio derbio = UniqueBio(BIO_new_file(path.c_str(), "rb"));
+    UniqueCmsContentInfo cms = UniqueCmsContentInfo(d2i_CMS_bio(derbio.get(), NULL));
     return cms;
 }
 
-X509 *read_secp384r1_cert()
+UniqueX509 read_secp384r1_cert()
 {
     std::vector<unsigned char> cert_data;
     std::filesystem::path path("/workspaces/openssl-ecdsa/scripts/cms-out/secp384r1-cert.pem");
     if (!std::filesystem::exists(path)) {
         std::cerr << "file not found:\n\t" << path.string() << std::endl;
     }
-    auto *certbio = BIO_new_file(path.c_str(), "rb");
+    UniqueBio certbio = UniqueBio(BIO_new_file(path.c_str(), "rb"));
     
-    auto *x509 = d2i_X509_bio(certbio, nullptr);
+    UniqueX509 x509 = UniqueX509(d2i_X509_bio(certbio.get(), nullptr));
     
-    BIO_free(certbio);
     return x509;
 }
 
@@ -252,38 +257,34 @@ int verify_cert_included_cms()
     int res = 0;
 
     // see scripts/cms-exc-certs.sh for generating these files
-    auto *cms = read_secp384r1_signed_cms();
-    stack_st_X509 *cert_stack = CMS_get1_certs(cms);
-    for (int c=0; c < sk_X509_num(cert_stack); ++c)
+    UniqueCmsContentInfo cms = read_secp384r1_signed_cms();
+    UniqueX509Stack cert_stack = UniqueX509Stack(CMS_get1_certs(cms.get()));
+    for (int c=0; c < sk_X509_num(cert_stack.get()); ++c)
     {
-        X509 *cert = sk_X509_value(cert_stack, c);
+        UniqueX509 cert = UniqueX509(sk_X509_value(cert_stack.get(), c));
         // verify the cert against its own publickey
-        res = X509_self_signed(cert, 1);
-        if (res == -1) { process_errors(); }
-        if (res != 1) {return res;}
+        res = X509_self_signed(cert.get(), 1);
+        // std::string t{  __builtin_FUNCTION() } ;
+        process_errors(res, std::string{  __builtin_FUNCTION() } + ":X509_self_signed");
         continue;
     }
 
-    // unsigned int flags = 0;
     unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY;
-    res = CMS_verify(cms, nullptr, nullptr, nullptr, nullptr, flags);
-    if (res == -1) { process_errors(); }
-    if (res != 1) {return res;}
+    res = CMS_verify(cms.get(), nullptr, nullptr, nullptr, nullptr, flags);
+    process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_verify");
     
-    auto *si_stack = CMS_get0_SignerInfos(cms);
-    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
+    UniqueCmsSignerInfoStack si_stack = UniqueCmsSignerInfoStack(CMS_get0_SignerInfos(cms.get()));
+    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack.get()); ++i)
     {
-        auto *si = sk_CMS_SignerInfo_value(si_stack, i);
-        auto *sig = CMS_SignerInfo_get0_signature(si);
-        auto *mctx = CMS_SignerInfo_get0_md_ctx(si);
-        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si);
+        UniqueCmsSignerInfo si = UniqueCmsSignerInfo(sk_CMS_SignerInfo_value(si_stack.get(), i));
+        auto *sig = CMS_SignerInfo_get0_signature(si.get());
+        auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
+        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
                 
-        res = CMS_SignerInfo_verify(si);
-        if (res == -1) { process_errors(); }
-        if (res != 1) {return res;}
-        // res = CMS_SignerInfo_verify_content(si, nullptr);
-        // if (res == -1) { process_errors(); }
-        // if (res != 1) {return res;}
+        res = CMS_SignerInfo_verify(si.get());
+        process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify");
+        // res = CMS_SignerInfo_verify_content(si.get(), nullptr);
+        // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify_content");
     }    
 
     return res;        
@@ -292,54 +293,50 @@ int verify_cert_included_cms()
 int verify_cert_excluded_cms()
 {
     int res = 0;
-    auto *errbio = BIO_new_file("err.log", "w");
 
     // see scripts/cms-exc-certs.sh for generating these files
-    auto *cms = read_secp384r1_signed_cms();
+    UniqueCmsContentInfo cms = read_secp384r1_signed_cms();
 
     auto *x509_stack = sk_X509_new(nullptr);
-    sk_X509_push(x509_stack, read_secp384r1_cert());
+    sk_X509_push(x509_stack, read_secp384r1_cert().get());
     
     X509_STORE  *x509_store = X509_STORE_new();
-    X509_STORE_add_cert(x509_store,  read_secp384r1_cert());
-    // res = X509_verify_cert()
+    X509_STORE_add_cert(x509_store,  read_secp384r1_cert().get());
+    // res = X509_verify_cert();
 
     unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
-    res = CMS_verify(cms, x509_stack, x509_store, NULL, NULL, flags);
-    if (res == -1) { process_errors(); }
-    if (res != 1) {return res;}
+    // !!!seg fault!!!
+    // res = CMS_verify(cms.get(), x509_stack, x509_store, NULL, NULL, flags);
+    // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_verify");
     
-    auto *si_stack = CMS_get0_SignerInfos(cms);
-    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
+    UniqueCmsSignerInfoStack si_stack = UniqueCmsSignerInfoStack(CMS_get0_SignerInfos(cms.get()));
+    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack.get()); ++i)
     {
-        auto *si = sk_CMS_SignerInfo_value(si_stack, i);
-        auto *sig = CMS_SignerInfo_get0_signature(si);
-        auto *mctx = CMS_SignerInfo_get0_md_ctx(si);
-        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si);
+        UniqueCmsSignerInfo si = UniqueCmsSignerInfo(sk_CMS_SignerInfo_value(si_stack.get(), i));
+        auto *sig = CMS_SignerInfo_get0_signature(si.get());
+        auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
+        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
                 
-        res = CMS_SignerInfo_verify(si);
-        if (res == -1) { process_errors(); }
-        if (res != 1) {return res;}
-        // res = CMS_SignerInfo_verify_content(si, nullptr);
-        // if (res == -1) { process_errors(); }
-        // if (res != 1) {return res;}
-    }    
+        // res = CMS_SignerInfo_verify(si.get());
+        // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify");
 
-    ERR_print_errors(errbio);
-    BIO_flush(errbio);
-    BIO_free(errbio);   // this closes the FILE stream
+        // res = CMS_SignerInfo_verify_content(si, nullptr);
+        // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify_content");
+    }    
+   
     return res;        
 }
 
 int main()
 {
+    int res;
     // use must first run scripts/cms-inc-certs.sh
     std::system("/workspaces/openssl-ecdsa/scripts/cms-inc-certs.sh");
-    int res = verify_cert_included_cms();
+    res = verify_cert_included_cms();
 
-    // // use must first run scripts/cms-exc-certs.sh
-    // std::system("/workspaces/openssl-ecdsa/scripts/cms-exc-certs.sh");
-    // res = verify_cert_excluded_cms();
+    // use must first run scripts/cms-exc-certs.sh
+    std::system("/workspaces/openssl-ecdsa/scripts/cms-exc-certs.sh");
+    res = verify_cert_excluded_cms();
 
     return 0;
 }

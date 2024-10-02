@@ -16,3 +16,6 @@ target_link_libraries(parse_cms PUBLIC PkgConfig::OPENSSL)
 
 add_executable(cms_verify ${CMAKE_SOURCE_DIR}/cms_verify.cpp)
 target_link_libraries(cms_verify PUBLIC PkgConfig::OPENSSL)
+
+add_executable(managed ${CMAKE_SOURCE_DIR}/managed.cpp)
+target_link_libraries(managed PUBLIC PkgConfig::OPENSSL)

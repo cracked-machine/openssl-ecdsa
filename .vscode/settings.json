@@ -55,6 +55,7 @@
         "iomanip": "cpp",
         "sstream": "cpp",
         "list": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "*.inc": "cpp"
     }
 }

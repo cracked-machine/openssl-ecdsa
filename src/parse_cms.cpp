@@ -1,50 +1,47 @@
 #include <openssl/bn.h>
 #include <openssl/types.h>
 #include <openssl/x509.h>
-#include <vector>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-
 #include <openssl/cms.h>
 #include <openssl/bio.h>
 #include <openssl/asn1.h>
 #include <openssl/ec.h>
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+#include <memory>
+
 #include "utils.hpp"
-// #include <openssl/x509.h>
 
+// managed by lambda deleter
+using ManagedCMS = std::shared_ptr<CMS_ContentInfo>;
 
-
-int read_binary_file(std::filesystem::path path, u8_vector &in)
+int get_cms(ManagedCMS &cms_ptr, std::string path)
 {
-    if (not std::filesystem::exists(path)) { return -1; }
-    // open filestream and write to "in" param
-    std::ifstream ifs(path, std::ios::in | std::ios::binary);
-    in.assign((std::istreambuf_iterator<char>(ifs)), {});
-    return 0;
+    int res = 0;
+
+    BIO* filebio = BIO_new_file(path.c_str(), "r");
+    res = flush_error_buffer();
+    
+    // set the deleter now, for when the application exits
+    cms_ptr = ManagedCMS(
+        d2i_CMS_bio(filebio, nullptr),
+        [](CMS_ContentInfo *p) { CMS_ContentInfo_free(p); }
+    );
+
+    // cleanup
+    BIO_free(filebio);
+
+    return res;
 }
 
-int parse_signinfos()
+int parse_signinfos(ManagedCMS &mmanagedcms)
 {
-    u8_vector cmd_der_bytes;
-    [[maybe_unused]] int status;
-    status = read_binary_file(
-        std::filesystem::path("/workspaces/openssl-ecdsa/bash/out/signedtext.der"), 
-        cmd_der_bytes
-    );
-    
-    BIO *bio = BIO_new_mem_buf(cmd_der_bytes.data(), cmd_der_bytes.size());
-    if (!bio) { std::terminate(); }
-
-    CMS_ContentInfo *cms = d2i_CMS_bio(bio, NULL);
-    if (!cms) {std::terminate(); }
-
     unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY;
-    if( 1 != CMS_verify(cms, NULL, NULL, NULL, NULL, flags)) { std::terminate(); }
+    if( 1 != CMS_verify(mmanagedcms.get(), NULL, NULL, NULL, NULL, flags)) { std::terminate(); }
     
-    auto *si_stack = CMS_get0_SignerInfos(cms);
+    auto *si_stack = CMS_get0_SignerInfos(mmanagedcms.get());
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
     {
         auto *si = sk_CMS_SignerInfo_value(si_stack, i);
@@ -105,20 +102,16 @@ int parse_encaps_octet_bytes(u8_vector &inout)
         inout.size()
     );
     return flush_error_buffer();
-    
 }
 
-int parse_signerinfos_signature( i8_vector &rbytesout, i8_vector &sbytesout)
+int parse_signerinfos_signature(
+    ManagedCMS mmanagedcms,
+    i8_vector &rbytesout, 
+    i8_vector &sbytesout)
 {
     int res = 0;
 
-    BIO* filebio = BIO_new_file("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der", "r");
-    res = flush_error_buffer();
-    
-    CMS_ContentInfo *cms_data = d2i_CMS_bio(filebio, nullptr);
-    res = flush_error_buffer();
-
-    auto *si_stack = CMS_get0_SignerInfos(cms_data);
+    auto *si_stack = CMS_get0_SignerInfos(mmanagedcms.get());
     res = flush_error_buffer();
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
     {
@@ -157,26 +150,16 @@ int parse_signerinfos_signature( i8_vector &rbytesout, i8_vector &sbytesout)
         ECDSA_SIG_free(ecdsa_sig);
         ASN1_TYPE_free(sig_octet_str_subseq);
     }
-
-    // cleanup
-    CMS_ContentInfo_free(cms_data);
-    BIO_free(filebio);
-
     return res;
 }
 
 int parse_signerinfos_signature_ident(
+    ManagedCMS &mmanagedcms,
     std::string &algotypeout)
 {
     int res = 0;
-
-    BIO* filebio = BIO_new_file("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der", "r");
-    res = flush_error_buffer();
     
-    CMS_ContentInfo *cms_data = d2i_CMS_bio(filebio, nullptr);
-    res = flush_error_buffer();
-    
-    auto *si_stack = CMS_get0_SignerInfos(cms_data);
+    auto *si_stack = CMS_get0_SignerInfos(mmanagedcms.get());
     res = flush_error_buffer();
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
     {
@@ -191,26 +174,15 @@ int parse_signerinfos_signature_ident(
         res = flush_error_buffer();
     
     }
-
-    // cleanup
-    CMS_ContentInfo_free(cms_data);
-    BIO_free(filebio);
-    
     return res;
 }
 
-int parse_econtent(u8_vector &out)
+int parse_econtent(ManagedCMS &mmanagedcms, u8_vector &out)
 {
     int res = 0;
 
-    BIO* filebio = BIO_new_file("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der", "r");
-    res = flush_error_buffer();
-    
-    CMS_ContentInfo *cms_data = d2i_CMS_bio(filebio, nullptr);
-    res = flush_error_buffer();
-
     // CMS_get0_content does NOT require cleanup/free
-    ASN1_OCTET_STRING **pp_content_octect = CMS_get0_content(cms_data);
+    ASN1_OCTET_STRING **pp_content_octect = CMS_get0_content(mmanagedcms.get());
     res = flush_error_buffer();
 
     ASN1_OCTET_STRING *asn1_octet_str = *pp_content_octect;
@@ -220,28 +192,32 @@ int parse_econtent(u8_vector &out)
         asn1_octet_str->data, 
         asn1_octet_str->data + asn1_octet_str->length * sizeof(unsigned char));
 
-    // cleanup
-    CMS_ContentInfo_free(cms_data);
-    BIO_free(filebio);
-
     return res;
 }
 
 int main()
 {
     int result = 0;
+
+    ManagedCMS mmanagedcms;
+    get_cms(
+        mmanagedcms,
+        "/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der"
+    );
+
     u8_vector content_bytes;
-    result = parse_econtent(content_bytes);
+    result = parse_econtent(mmanagedcms, content_bytes);
+    
     print_vector_bytes(content_bytes);
     result = parse_encaps_octet_bytes(content_bytes);
     
     std::string algoident;
-    result = parse_signerinfos_signature_ident(algoident);
+    result = parse_signerinfos_signature_ident(mmanagedcms, algoident);
     std::cout << algoident << std::endl;
 
     i8_vector rbytes;
     i8_vector sbytes;
-    result = parse_signerinfos_signature(rbytes, sbytes);
+    result = parse_signerinfos_signature(mmanagedcms, rbytes, sbytes);
     print_vector_bytes(rbytes);
     print_vector_bytes(sbytes);
 

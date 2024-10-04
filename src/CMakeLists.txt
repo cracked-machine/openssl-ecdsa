@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(ecdsa)
 add_compile_options("-g")
 add_compile_options(-Wall)
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
 
 # We shouldn't leave this enabled!!!
 add_compile_options(-Wno-deprecated-declarations)

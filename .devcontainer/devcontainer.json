@@ -6,7 +6,8 @@
             "extensions": [
                 "ms-vscode.hexeditor",
                 "ms-vscode.cpptools",
-                "twxs.cmake"
+                "twxs.cmake",
+                "llvm-vs-code-extensions.vscode-clangd"
             ],
             "settings": {
                 // always default to bash not sh

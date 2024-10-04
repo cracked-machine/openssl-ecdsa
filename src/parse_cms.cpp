@@ -1,3 +1,4 @@
+#include <openssl/types.h>
 #include <vector>
 #include <filesystem>
 #include <fstream>
@@ -7,7 +8,10 @@
 #include <openssl/cms.h>
 #include <openssl/bio.h>
 #include <openssl/asn1.h>
+
+#include "utils.hpp"
 // #include <openssl/x509.h>
+
 
 int read_binary_file(std::filesystem::path path, std::vector<uint8_t> &in)
 {
@@ -82,10 +86,96 @@ int parse_signinfos()
     return 0;
 }
 
+// if the eContent contains 
+int parse_encaps_octet_bytes(std::vector<unsigned char> &inout)
+{
+    auto *raw_octet_str = (const unsigned char*)inout.data();
 
+    long foundlen;
+    int foundtag, foundclass;
+    [[maybe_unused]] int foundtype = ASN1_get_object(
+        &raw_octet_str, 
+        &foundlen, 
+        &foundtag, 
+        &foundclass, 
+        inout.size()
+    );
+    return flush_error_buffer();
+    
+}
+
+int parse_signerinfos_signature(std::vector<unsigned char> &out)
+{
+    int res = 0;
+
+    BIO* filebio = BIO_new_file("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der", "r");
+    res = flush_error_buffer();
+    
+    CMS_ContentInfo *cms_data = d2i_CMS_bio(filebio, nullptr);
+    res = flush_error_buffer();
+
+    auto *si_stack = CMS_get0_SignerInfos(cms_data);
+    res = flush_error_buffer();
+    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
+    {
+        auto *si = sk_CMS_SignerInfo_value(si_stack, i);
+        // CMS_SignerInfo_get0_signature does NOT require cleanup/free
+        ASN1_OCTET_STRING *sig_octets = CMS_SignerInfo_get0_signature(si);
+        
+        res = flush_error_buffer();
+
+        out = std::vector<unsigned char>(
+        sig_octets->data, 
+        sig_octets->data + sig_octets->length * sizeof(unsigned char));
+    }
+
+    // cleanup
+    CMS_ContentInfo_free(cms_data);
+    BIO_free(filebio);
+
+    return res;
+}
+
+int parse_econtent(std::vector<unsigned char> &out)
+{
+    int res = 0;
+
+    BIO* filebio = BIO_new_file("/workspaces/openssl-ecdsa/scripts/cms-out/signedtext.der", "r");
+    res = flush_error_buffer();
+    
+    CMS_ContentInfo *cms_data = d2i_CMS_bio(filebio, nullptr);
+    res = flush_error_buffer();
+
+    // CMS_get0_content does NOT require cleanup/free
+    ASN1_OCTET_STRING **pp_content_octect = CMS_get0_content(cms_data);
+    res = flush_error_buffer();
+
+    ASN1_OCTET_STRING *asn1_octet_str = *pp_content_octect;
+    if(!asn1_octet_str) { return -1; }
+
+    out = std::vector<unsigned char>(
+        asn1_octet_str->data, 
+        asn1_octet_str->data + asn1_octet_str->length * sizeof(unsigned char));
+
+    // cleanup
+    CMS_ContentInfo_free(cms_data);
+    BIO_free(filebio);
+
+    return res;
+}
 
 int main()
 {
-    // /workspaces/openssl-ecdsa/bash/out/signedtext.der
+    int result = 0;
+    std::vector<unsigned char> content_bytes;
+    result = parse_econtent(content_bytes);
+    print_vector_bytes(content_bytes);
+    result = parse_encaps_octet_bytes(content_bytes);
+    
+    std::vector<unsigned char> signature_bytes;
+    result = parse_signerinfos_signature(signature_bytes);
+    print_vector_bytes(signature_bytes);
+
+    return result;
 
 }

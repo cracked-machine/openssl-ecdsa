@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(ecdsa)
 add_compile_options("-g")
+add_compile_options(-Wall)
+
+# We shouldn't leave this enabled!!!
+add_compile_options(-Wno-deprecated-declarations)
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(OPENSSL REQUIRED IMPORTED_TARGET openssl)

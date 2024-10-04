@@ -46,5 +46,5 @@ int sign_and_verify()
 int main( int argc , char * argv[] )
 {
     int status = sign_and_verify();
-    return(0) ;
+    return(status) ;
 }

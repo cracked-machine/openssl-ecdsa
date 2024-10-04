@@ -277,9 +277,9 @@ int verify_cert_included_cms()
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack.get()); ++i)
     {
         UniqueCmsSignerInfo si = UniqueCmsSignerInfo(sk_CMS_SignerInfo_value(si_stack.get(), i));
-        auto *sig = CMS_SignerInfo_get0_signature(si.get());
-        auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
-        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
+        [[maybe_unused]] auto *sig = CMS_SignerInfo_get0_signature(si.get());
+        [[maybe_unused]] auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
+        [[maybe_unused]] auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
                 
         res = CMS_SignerInfo_verify(si.get());
         process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify");
@@ -304,7 +304,7 @@ int verify_cert_excluded_cms()
     X509_STORE_add_cert(x509_store,  read_secp384r1_cert().get());
     // res = X509_verify_cert();
 
-    unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
+    [[maybe_unused]] unsigned int flags = CMS_NO_SIGNER_CERT_VERIFY | CMS_NO_ATTR_VERIFY;
     // !!!seg fault!!!
     // res = CMS_verify(cms.get(), x509_stack, x509_store, NULL, NULL, flags);
     // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_verify");
@@ -313,9 +313,9 @@ int verify_cert_excluded_cms()
     for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack.get()); ++i)
     {
         UniqueCmsSignerInfo si = UniqueCmsSignerInfo(sk_CMS_SignerInfo_value(si_stack.get(), i));
-        auto *sig = CMS_SignerInfo_get0_signature(si.get());
-        auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
-        auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
+        [[maybe_unused]] auto *sig = CMS_SignerInfo_get0_signature(si.get());
+        [[maybe_unused]] auto *mctx = CMS_SignerInfo_get0_md_ctx(si.get());
+        [[maybe_unused]] auto *pctx = CMS_SignerInfo_get0_pkey_ctx(si.get());
                 
         // res = CMS_SignerInfo_verify(si.get());
         // process_errors(res, std::string{  __builtin_FUNCTION() } + ":CMS_SignerInfo_verify");
@@ -329,7 +329,7 @@ int verify_cert_excluded_cms()
 
 int main()
 {
-    int res;
+    [[maybe_unused]] int res;
     // use must first run scripts/cms-inc-certs.sh
     std::system("/workspaces/openssl-ecdsa/scripts/cms-inc-certs.sh");
     res = verify_cert_included_cms();

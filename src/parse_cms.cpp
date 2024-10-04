@@ -18,11 +18,10 @@ int read_binary_file(std::filesystem::path path, std::vector<uint8_t> &in)
     return 0;
 }
 
-int main()
+int parse_signinfos()
 {
-    // /workspaces/openssl-ecdsa/bash/out/signedtext.der
     std::vector<uint8_t> cmd_der_bytes;
-    int status;
+    [[maybe_unused]] int status;
     status = read_binary_file(
         std::filesystem::path("/workspaces/openssl-ecdsa/bash/out/signedtext.der"), 
         cmd_der_bytes
@@ -54,9 +53,9 @@ int main()
             std::cout << "\t" << attrType->type << ": ";
             std::cout << attrType->value.asn1_string->data << std::endl;
 
-            auto v = attrType->value;
+            [[maybe_unused]] auto v = attrType->value;
             const ASN1_ITEM *item = NULL;
-            void *thing = NULL;
+            [[maybe_unused]] void *thing = NULL;
             std::vector<unsigned char> buf(100);
             unsigned char *s = buf.data();
             switch(attrType->type)
@@ -81,4 +80,12 @@ int main()
     }
 
     return 0;
+}
+
+
+
+int main()
+{
+    // /workspaces/openssl-ecdsa/bash/out/signedtext.der
+
 }

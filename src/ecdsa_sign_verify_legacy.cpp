@@ -83,5 +83,5 @@ static int sign_and_verify_deprecated()
 int main( int argc , char * argv[] )
 {
     int status = sign_and_verify_deprecated();
-    return(0) ;
+    return(status) ;
 }

@@ -1,15 +1,5 @@
-#ifndef __UTILS_HPP__
-#define __UTILS_HPP__
-
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <openssl/asn1.h>
-#include <string>
+#include "parser_utils.hpp"
 #include <iostream>
-#include <vector>
-
-using u8_vector = std::vector<unsigned char>;
-using i8_vector = std::vector<char>;
 
 void process_errors(int result, std::string op)
 {
@@ -28,7 +18,7 @@ void process_errors(int result, std::string op)
 }
 
 // flush all errors from the buffer to stdout
-int flush_error_buffer(bool abort_on_errors = false)
+int flush_error_buffer(bool abort_on_errors)
 {
     int status = 0;
     i8_vector errbuf;
@@ -72,7 +62,3 @@ void print_vector_bytes(i8_vector& in)
         std::cout << std::hex << static_cast<int>(b);
     std::cout << std::endl;
 }
-
-// template void print_raw_bytes<const unsigned char>;
-
-#endif

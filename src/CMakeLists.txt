@@ -17,8 +17,11 @@ target_link_libraries(ecdsa_sign_verify_legacy PUBLIC PkgConfig::OPENSSL)
 add_executable(ecdsa_sign_verify ${CMAKE_SOURCE_DIR}/ecdsa_sign_verify.cpp)
 target_link_libraries(ecdsa_sign_verify PUBLIC PkgConfig::OPENSSL)
 
-add_executable(parse_cms ${CMAKE_SOURCE_DIR}/parse_cms.cpp)
-target_link_libraries(parse_cms PUBLIC PkgConfig::OPENSSL)
+add_executable(cms_parser 
+    ${CMAKE_SOURCE_DIR}/cms_parser.cpp
+    ${CMAKE_SOURCE_DIR}/parser_utils.cpp
+)
+target_link_libraries(cms_parser PUBLIC PkgConfig::OPENSSL)
 
 add_executable(cms_verify ${CMAKE_SOURCE_DIR}/cms_verify.cpp)
 target_link_libraries(cms_verify PUBLIC PkgConfig::OPENSSL)

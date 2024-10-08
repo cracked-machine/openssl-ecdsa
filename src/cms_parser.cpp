@@ -1,4 +1,5 @@
 #include <openssl/bn.h>
+#include <openssl/objects.h>
 #include <openssl/types.h>
 #include <openssl/x509.h>
 #include <openssl/cms.h>
@@ -33,6 +34,47 @@ int get_cms(ManagedCMS &cms_ptr, std::string path)
 
     return res;
 }
+
+int get_signerinfos_digestalgorithm(ManagedCMS &mmanagedcms)
+{
+    int res = 0;
+    
+    auto *si_stack = CMS_get0_SignerInfos(mmanagedcms.get());
+    res = flush_error_buffer();
+    res = CMS_verify(
+        mmanagedcms.get(), 
+        nullptr, 
+        nullptr, 
+        nullptr, 
+        nullptr, 
+        CMS_NO_SIGNER_CERT_VERIFY);
+    res = flush_error_buffer();
+
+    // res = CMS_digest_verify(mmanagedcms.get(), nullptr, nullptr, 0);
+    // res = flush_error_buffer();
+
+    for(int i = 0; i < sk_CMS_SignerInfo_num(si_stack); ++i)
+    {
+        auto *si = sk_CMS_SignerInfo_value(si_stack, i);
+        
+        // X509_ALGOR *x509_algo;
+        // CMS_SignerInfo_get0_algs(si, nullptr, nullptr, nullptr, &x509_algo);
+    
+        EVP_MD_CTX  *md_ctx = CMS_SignerInfo_get0_md_ctx(si);
+        res = flush_error_buffer();
+
+        const char *md_name = EVP_MD_CTX_get0_name(md_ctx);
+        EVP_MD *md = EVP_MD_CTX_get1_md(md_ctx);
+        std::string name("sha256");
+        name.resize(100);
+        // res = EVP_MD_is_a((EVP_MD*)OBJ_nid2obj(NID_sha256), name.data());
+        res = flush_error_buffer();
+
+        int h = 0;
+    }
+}
+
+
 
 int parse_signinfos(ManagedCMS &mmanagedcms)
 {
@@ -218,6 +260,8 @@ int main()
     result = parse_signerinfos_signature(mmanagedcms, rbytes, sbytes);
     print_vector_bytes(rbytes);
     print_vector_bytes(sbytes);
+
+    result = get_signerinfos_digestalgorithm(mmanagedcms);
 
     return result;
 

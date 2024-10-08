@@ -55,10 +55,10 @@
             ]
         },
         {
-            "name": "(gdb) parse_cms",
+            "name": "(gdb) cms_parser",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/parse_cms",
+            "program": "${workspaceFolder}/build/cms_parser",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",

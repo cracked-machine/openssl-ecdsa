@@ -1,5 +1,6 @@
 {
     "C_Cpp.intelliSenseEngine": "disabled",
+    
     "files.eol": "\n",  // in case this is run from a window machine
     "files.associations": {
         "iostream": "cpp",
